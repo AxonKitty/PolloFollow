@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { cn, formatNumber, formatTimeAgo, formatDate, getTagEmoji, getTagStyle } from '@/lib/utils'
+import { cn, formatNumber, getTagEmoji } from '@/lib/utils'
 import { mockTraders } from '@/lib/mock-data'
-import { WalletConnect } from '@/components/wallet-connect'
+import { Users, Copy, Eye } from 'lucide-react'
 
 type TabType = 'smart_money' | 'reverse' | 'whale' | 'all'
 
@@ -17,20 +17,20 @@ function TradersTabs({ activeTab, setActiveTab }: { activeTab: TabType; setActiv
   ]
 
   return (
-    <div className="flex gap-2 border-b border-base-gray-200 overflow-x-auto bg-white rounded-t-lg px-4">
+    <div className="flex gap-1 cyber-card p-1 overflow-x-auto">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={cn(
-            "px-4 py-3 transition-smooth-fast whitespace-nowrap font-medium",
+            "px-4 py-2.5 rounded-lg transition-all whitespace-nowrap text-sm font-medium",
             activeTab === tab.id
-              ? "border-b-2 border-primary text-primary"
-              : "text-base-gray-700 hover:text-foreground"
+              ? "bg-neon-cyan text-cyber-black"
+              : "text-dim-white hover:bg-cyber-gray"
           )}
         >
           {tab.label}
-          <span className="ml-2 text-xs">({tab.count})</span>
+          <span className="ml-1.5 text-xs opacity-70">({tab.count})</span>
         </button>
       ))}
     </div>
@@ -41,18 +41,15 @@ function TraderCard({ trader }: { trader: any }) {
   const [isFollowing, setIsFollowing] = useState(false)
 
   return (
-    <div className="rounded-lg bg-white border border-base-gray-200 p-6 card-elevated transition-smooth">
+    <div className="cyber-card p-5">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <Link href={`/traders/${trader.address}`} className="font-mono text-lg font-medium text-foreground hover:text-primary transition-smooth-fast">
+          <Link href={`/traders/${trader.address}`} className="font-mono text-base font-medium text-foreground hover:text-neon-cyan transition-smooth-fast">
             {trader.shortAddress}
           </Link>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {trader.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className={cn("rounded-lg border px-2 py-1 text-xs font-medium", getTagStyle(tag))}
-              >
+              <span key={tag} className="cyber-tag-cyan text-[10px] py-0.5">
                 {getTagEmoji(tag)} {tag}
               </span>
             ))}
@@ -61,84 +58,82 @@ function TraderCard({ trader }: { trader: any }) {
         <button
           onClick={() => setIsFollowing(!isFollowing)}
           className={cn(
-            "rounded-lg px-4 py-2 text-sm font-medium transition-smooth-fast",
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
             isFollowing
-              ? "bg-base-gray-200 text-base-gray-700 hover:bg-base-gray-300"
-              : "bg-primary text-white hover:bg-primary/90"
+              ? "bg-cyber-gray text-dim-white border border-cyber-border"
+              : "bg-neon-cyan text-cyber-black hover:bg-neon-green"
           )}
         >
           {isFollowing ? "✓ 已关注" : "+ 关注"}
         </button>
       </div>
 
-      <div className="mb-4 grid grid-cols-4 gap-4 rounded-lg bg-base-gray-50 p-4 border border-base-gray-200">
+      <div className="mb-4 grid grid-cols-4 gap-3 rounded-lg bg-cyber-darker p-3 border border-cyber-border">
         <div>
-          <div className="text-xs text-base-gray-700 font-medium">胜率</div>
-          <div className="mt-1 text-2xl font-bold text-smartmoney">{trader.winRate}%</div>
-          <div className="text-xs text-base-gray-700">近7天: {trader.winRate7d}%</div>
+          <div className="text-[10px] text-dim-gray font-mono">胜率</div>
+          <div className="mt-1 text-lg font-bold text-neon-cyan font-mono">{trader.winRate}%</div>
+          <div className="text-[10px] text-dim-gray font-mono">7d: {trader.winRate7d}%</div>
         </div>
         <div>
-          <div className="text-xs text-base-gray-700 font-medium">ROI</div>
-          <div className="mt-1 text-2xl font-bold text-success">{trader.roi}%</div>
+          <div className="text-[10px] text-dim-gray font-mono">ROI</div>
+          <div className="mt-1 text-lg font-bold text-neon-green font-mono">{trader.roi}%</div>
         </div>
         <div>
-          <div className="text-xs text-base-gray-700 font-medium">总盈利</div>
-          <div className="mt-1 text-2xl font-bold text-foreground">${formatNumber(trader.totalProfit)}</div>
+          <div className="text-[10px] text-dim-gray font-mono">总盈利</div>
+          <div className="mt-1 text-lg font-bold text-foreground font-mono">${formatNumber(trader.totalProfit)}</div>
         </div>
         <div>
-          <div className="text-xs text-base-gray-700 font-medium">总交易</div>
-          <div className="mt-1 text-2xl font-bold text-foreground">{trader.totalTrades}笔</div>
+          <div className="text-[10px] text-dim-gray font-mono">总交易</div>
+          <div className="mt-1 text-lg font-bold text-foreground font-mono">{trader.totalTrades}笔</div>
         </div>
       </div>
 
       <div className="mb-4">
-        <h4 className="mb-2 text-sm font-medium text-foreground">🎯 擅长领域</h4>
-        <div className="space-y-2">
+        <h4 className="mb-2 text-xs font-medium text-dim-white">🎯 擅长领域</h4>
+        <div className="space-y-1.5">
           {trader.expertise.slice(0, 3).map((exp: any) => (
-            <div key={exp.category} className="flex items-center justify-between text-sm">
-              <span className="text-foreground">{exp.category}</span>
+            <div key={exp.category} className="flex items-center justify-between text-xs">
+              <span className="text-dim-white">{exp.category}</span>
               <div className="flex items-center gap-2">
-                <div className="h-2 w-32 overflow-hidden rounded-full bg-base-gray-200">
+                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-cyber-border">
                   <div
-                    className={cn(
-                      "h-full rounded-full",
-                      exp.winRate >= 70 ? "bg-success" : exp.winRate >= 50 ? "bg-warning" : "bg-danger"
-                    )}
+                    className={cn("h-full rounded-full", exp.winRate >= 70 ? "bg-neon-green" : exp.winRate >= 50 ? "bg-neon-orange" : "bg-neon-red")}
                     style={{ width: `${exp.winRate}%` }}
                   />
                 </div>
-                <span className="w-12 text-right text-xs text-base-gray-700">{exp.winRate}%</span>
-                <span className="w-16 text-right text-xs text-base-gray-600">({exp.trades}笔)</span>
+                <span className="w-10 text-right text-[10px] text-dim-gray font-mono">{exp.winRate}%</span>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-2 rounded-lg bg-base-gray-50 border border-base-gray-200 p-3">
-        <span className="text-lg">
+      <div className="mb-4 flex items-center gap-2 rounded-lg bg-cyber-darker border border-cyber-border p-2.5">
+        <span className="text-base">
           {trader.recentPerformance.status === 'good' ? '✅' : trader.recentPerformance.status === 'warning' ? '⚠️' : '🔴'}
         </span>
-        <span className="text-sm text-base-gray-900">{trader.recentPerformance.message}</span>
+        <span className="text-xs text-dim-white">{trader.recentPerformance.message}</span>
       </div>
 
-      <div className="mb-4 rounded-lg bg-smartmoney/10 border border-smartmoney/20 p-3">
-        <div className="mb-1 flex items-center gap-2 text-sm font-medium text-smartmoney">
+      <div className="mb-4 rounded-lg bg-neon-cyan/10 border border-neon-cyan/20 p-3">
+        <div className="mb-1 flex items-center gap-2 text-xs font-medium text-neon-cyan">
           <span>🤖</span>
           <span>AI 智能点评</span>
         </div>
-        <p className="text-sm text-base-gray-900">{trader.aiReview}</p>
+        <p className="text-xs text-dim-white">{trader.aiReview}</p>
       </div>
 
       <div className="flex gap-2">
         <Link
           href={`/traders/${trader.address}`}
-          className="flex-1 rounded-lg bg-base-gray-100 border border-base-gray-200 py-2 text-center text-sm font-medium text-foreground hover:bg-base-gray-200 transition-smooth-fast"
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-cyber-darker border border-cyber-border py-2 text-xs font-medium text-dim-white hover:border-neon-cyan/30 transition-all"
         >
+          <Eye className="w-3.5 h-3.5" />
           查看详情
         </Link>
-        <button className="flex-1 rounded-lg bg-primary py-2 text-sm font-medium text-white hover:bg-primary/90 transition-smooth-fast">
-          复制策略
+        <button className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-neon-cyan py-2 text-xs font-medium text-cyber-black hover:bg-neon-green transition-all">
+          <Copy className="w-3.5 h-3.5" />
+          Copy Homework
         </button>
       </div>
     </div>
@@ -159,45 +154,42 @@ export default function TradersPage() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'win_rate':
-          return b.winRate - a.winRate
-        case 'roi':
-          return b.roi - a.roi
-        case 'profit':
-          return b.totalProfit - a.totalProfit
-        case 'volume':
-          return b.totalVolume - a.totalVolume
-        default:
-          return 0
+        case 'win_rate': return b.winRate - a.winRate
+        case 'roi': return b.roi - a.roi
+        case 'profit': return b.totalProfit - a.totalProfit
+        case 'volume': return b.totalVolume - a.totalVolume
+        default: return 0
       }
     })
 
   return (
-    <div className="space-y-6 pb-20 md:pb-6">
+    <div className="space-y-5 pb-16">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold gradient-text-pink flex items-center gap-2">
+          <Users className="w-6 h-6 text-neon-pink" />
           Traders
         </h1>
+        <p className="text-[10px] text-dim-gray mt-1 font-mono">// Copy homework from the best whales</p>
       </div>
 
       <TradersTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-base-gray-700 font-medium">排序:</span>
+        <span className="text-xs text-dim-gray font-mono">排序:</span>
         {[
           { value: 'win_rate' as const, label: '胜率 ↓' },
           { value: 'roi' as const, label: 'ROI ↓' },
-          { value: 'profit' as const, label: '总盈利 ↓' },
+          { value: 'profit' as const, label: '盈利 ↓' },
           { value: 'volume' as const, label: '交易量 ↓' },
         ].map((option) => (
           <button
             key={option.value}
             onClick={() => setSortBy(option.value)}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-smooth-fast",
+              "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
               sortBy === option.value
-                ? "bg-primary text-white"
-                : "bg-base-gray-100 text-base-gray-700 hover:bg-base-gray-200"
+                ? "bg-neon-pink text-cyber-black"
+                : "bg-cyber-darker text-dim-white border border-cyber-border hover:border-neon-pink/30"
             )}
           >
             {option.label}
@@ -205,7 +197,7 @@ export default function TradersPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {filteredTraders.map((trader) => (
           <TraderCard key={trader.address} trader={trader} />
         ))}
@@ -213,4 +205,3 @@ export default function TradersPage() {
     </div>
   )
 }
-

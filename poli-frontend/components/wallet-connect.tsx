@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useChainId } from 'wagmi'
 import { useTokenBalance } from '@/lib/hooks/use-token-balance'
 import { getContractAddress, DEFAULT_TOKEN } from '@/lib/contracts/addresses'
+import { Wallet, AlertTriangle } from 'lucide-react'
 
 export function WalletConnect() {
   const chainId = useChainId()
@@ -52,24 +53,25 @@ export function WalletConnect() {
             {(() => {
               if (!connected) {
                 return (
-                  <Button
+                  <button
                     onClick={openConnectModal}
-                    className="w-full h-14 border-2 border-[#0052FF] bg-white hover:bg-[#0052FF]/5 text-[#0052FF] transition-smooth-fast rounded-lg text-base font-semibold"
+                    className="w-full py-3 rounded-lg bg-gradient-to-r from-neon-cyan to-neon-green text-cyber-black font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 glow-cyan"
                   >
+                    <Wallet className="w-4 h-4" />
                     Connect Wallet
-                  </Button>
+                  </button>
                 )
               }
 
               if (chain.unsupported) {
                 return (
-                  <Button
+                  <button
                     onClick={openChainModal}
-                    variant="destructive"
-                    className="w-full"
+                    className="w-full py-3 rounded-lg bg-neon-red/20 border border-neon-red/50 text-neon-red font-medium text-sm hover:bg-neon-red/30 transition-all flex items-center justify-center gap-2"
                   >
-                    ⚠️ 错误网络
-                  </Button>
+                    <AlertTriangle className="w-4 h-4" />
+                    Wrong Network
+                  </button>
                 )
               }
 
@@ -77,27 +79,25 @@ export function WalletConnect() {
                 <div className="space-y-2 w-full">
                   {/* Balance display */}
                   {tokenAddress && (
-                    <div className="bg-base-gray-50 rounded-lg p-3 border border-base-gray-200">
-                      <div className="text-xs text-base-gray-700 mb-1">USDC 余额</div>
-                      <div className="text-lg font-bold text-foreground">
+                    <div className="rounded-lg bg-cyber-darker border border-cyber-border p-3">
+                      <div className="text-[10px] text-dim-gray font-mono mb-1">USDC Balance</div>
+                      <div className="text-lg font-bold text-neon-green font-mono">
                         ${parseFloat(formattedBalance).toFixed(2)}
                       </div>
                     </div>
                   )}
 
                   {/* Network button */}
-                  <Button
+                  <button
                     onClick={openChainModal}
-                    variant="outline"
-                    className="w-full border-base-gray-200 bg-white hover:bg-base-gray-50 transition-smooth-fast justify-start"
+                    className="w-full py-2 rounded-lg bg-cyber-darker border border-cyber-border hover:border-neon-cyan/30 transition-all flex items-center justify-start px-3 gap-2"
                   >
                     {chain.hasIcon && (
                       <div
-                        className="mr-2"
                         style={{
                           background: chain.iconBackground,
-                          width: 20,
-                          height: 20,
+                          width: 18,
+                          height: 18,
                           borderRadius: 999,
                           overflow: 'hidden',
                         }}
@@ -106,22 +106,21 @@ export function WalletConnect() {
                           <img
                             alt={chain.name ?? 'Chain icon'}
                             src={chain.iconUrl}
-                            style={{ width: 20, height: 20 }}
+                            style={{ width: 18, height: 18 }}
                           />
                         )}
                       </div>
                     )}
-                    <span className="text-sm">{chain.name}</span>
-                  </Button>
+                    <span className="text-xs text-dim-white font-mono">{chain.name}</span>
+                  </button>
 
                   {/* Account button */}
-                  <Button
+                  <button
                     onClick={openAccountModal}
-                    variant="outline"
-                    className="w-full border-base-gray-200 bg-white hover:bg-base-gray-50 transition-smooth-fast font-mono text-sm"
+                    className="w-full py-2 rounded-lg bg-cyber-darker border border-cyber-border hover:border-neon-cyan/30 transition-all text-xs text-neon-cyan font-mono"
                   >
                     {account.displayName}
-                  </Button>
+                  </button>
                 </div>
               )
             })()}
@@ -131,4 +130,3 @@ export function WalletConnect() {
     </ConnectButton.Custom>
   )
 }
-

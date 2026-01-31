@@ -2,43 +2,38 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { cn, formatNumber, formatTimeAgo, formatDate } from '@/lib/utils'
-import { mockMarkets, mockOrderbook, mockTrades, mockTraders } from '@/lib/mock-data'
-import { WalletConnect } from '@/components/wallet-connect'
+import { LineChart, Line, ResponsiveContainer } from 'recharts'
+import { cn, formatNumber, formatDate } from '@/lib/utils'
+import { mockMarkets } from '@/lib/mock-data'
+import { TrendingUp, Filter, BarChart3 } from 'lucide-react'
 
 function MarketCard({ market }: { market: any }) {
   return (
     <Link href={`/markets/${market.slug}`} className="block">
-      <div className="rounded-lg bg-white border border-base-gray-200 p-4 hover:bg-base-gray-50 transition-smooth-fast card-elevated">
-        <div className="mb-2">
-          <h3 className="text-lg font-semibold text-foreground line-clamp-2">{market.title}</h3>
-          <div className="mt-1 flex items-center gap-2 text-xs">
-            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{market.subcategory}</span>
-            <span className="text-base-gray-700">截止 {formatDate(market.endDate)}</span>
+      <div className="cyber-card p-4 hover:border-neon-cyan/40 transition-all">
+        <div className="mb-3">
+          <h3 className="text-sm font-semibold text-foreground line-clamp-2">{market.title}</h3>
+          <div className="mt-2 flex items-center gap-2 text-xs">
+            <span className="cyber-tag-cyan py-0.5">{market.subcategory}</span>
+            <span className="text-dim-gray font-mono">截止 {formatDate(market.endDate)}</span>
           </div>
         </div>
 
         <div className="flex items-end justify-between">
           <div>
-            <div className="text-2xl font-bold text-foreground">${market.currentPrice.toFixed(2)}</div>
-            <div
-              className={cn(
-                "text-sm font-medium",
-                market.priceChange24h > 0 ? "text-success" : "text-danger"
-              )}
-            >
+            <div className="text-xl font-bold font-mono text-foreground">${market.currentPrice.toFixed(2)}</div>
+            <div className={cn("text-xs font-mono", market.priceChange24h > 0 ? "text-neon-green" : "text-neon-red")}>
               {market.priceChange24h > 0 ? "↑" : "↓"} {Math.abs(market.priceChange24h).toFixed(2)}%
             </div>
           </div>
 
-          <div className="h-12 w-24">
+          <div className="h-10 w-20">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={market.priceHistory7d}>
                 <Line
                   type="monotone"
                   dataKey="price"
-                  stroke={market.priceChange24h > 0 ? "#10B981" : "#EF4444"}
+                  stroke={market.priceChange24h > 0 ? "#00FF9D" : "#FF0055"}
                   strokeWidth={1.5}
                   dot={false}
                 />
@@ -47,16 +42,11 @@ function MarketCard({ market }: { market: any }) {
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between text-xs text-base-gray-700">
-          <span>24h 交易量: ${formatNumber(market.volume24h)}</span>
+        <div className="mt-3 flex items-center justify-between text-[10px] text-dim-gray font-mono">
+          <span>24h Vol: ${formatNumber(market.volume24h)}</span>
           <span className="flex items-center gap-1">
             流动性:
-            <span
-              className={cn(
-                "font-medium",
-                market.liquidity > 70 ? "text-success" : market.liquidity > 40 ? "text-warning" : "text-danger"
-              )}
-            >
+            <span className={cn("font-medium", market.liquidity > 70 ? "text-neon-green" : market.liquidity > 40 ? "text-neon-orange" : "text-neon-red")}>
               {market.liquidity}/100
             </span>
           </span>
@@ -76,39 +66,38 @@ export default function MarketsPage() {
     .filter((m) => selectedCategory === '全部' || m.subcategory === selectedCategory)
     .sort((a, b) => {
       switch (sortBy) {
-        case 'volume':
-          return b.volume24h - a.volume24h
-        case 'price_change':
-          return b.priceChange24h - a.priceChange24h
-        case 'liquidity':
-          return b.liquidity - a.liquidity
-        default:
-          return 0
+        case 'volume': return b.volume24h - a.volume24h
+        case 'price_change': return b.priceChange24h - a.priceChange24h
+        case 'liquidity': return b.liquidity - a.liquidity
+        default: return 0
       }
     })
 
   return (
-    <div className="space-y-6 pb-20 md:pb-6">
+    <div className="space-y-5 pb-16">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
+          <TrendingUp className="w-6 h-6 text-neon-cyan" />
           Markets
         </h1>
+        <p className="text-[10px] text-dim-gray mt-1 font-mono">// Leak Alpha from prediction markets</p>
       </div>
 
       {/* 筛选和排序 */}
-      <div className="flex flex-wrap items-center gap-4 rounded-lg bg-white border border-base-gray-200 p-4 card-elevated">
+      <div className="cyber-card p-4 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-base-gray-700 font-medium">分类:</span>
-          <div className="flex gap-2">
+          <Filter className="w-4 h-4 text-dim-gray" />
+          <span className="text-xs text-dim-gray font-mono">分类:</span>
+          <div className="flex gap-1.5">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={cn(
-                  "rounded-lg px-3 py-1.5 text-sm font-medium transition-smooth-fast",
+                  "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
                   selectedCategory === cat
-                    ? "bg-primary text-white"
-                    : "bg-base-gray-100 text-base-gray-700 hover:bg-base-gray-200"
+                    ? "bg-neon-cyan text-cyber-black"
+                    : "bg-cyber-darker text-dim-white border border-cyber-border hover:border-neon-cyan/30"
                 )}
               >
                 {cat}
@@ -118,11 +107,12 @@ export default function MarketsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-base-gray-700 font-medium">排序:</span>
+          <BarChart3 className="w-4 h-4 text-dim-gray" />
+          <span className="text-xs text-dim-gray font-mono">排序:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="rounded-lg bg-base-gray-100 border border-base-gray-200 px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="rounded-lg bg-cyber-darker border border-cyber-border px-3 py-1.5 text-xs text-foreground font-mono focus:outline-none focus:border-neon-cyan/50"
           >
             <option value="volume">交易量 ↓</option>
             <option value="price_change">价格变化 ↓</option>

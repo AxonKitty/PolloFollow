@@ -1,28 +1,69 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { cn, formatNumber, formatTimeAgo, getTagEmoji, getTagStyle } from '@/lib/utils'
-import { mockMarkets, mockTraders, mockAlerts, mockSentimentData } from '@/lib/mock-data'
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn, formatNumber, formatTimeAgo, getTagEmoji } from '@/lib/utils'
+import { mockMarkets, mockTraders, mockSentimentData } from '@/lib/mock-data'
+import { TrendingUp, Users, Zap, AlertTriangle, Copy, Eye } from 'lucide-react'
 
-function AlertFeed() {
+// Whale Avatar Component
+function WhaleAvatar({ type, size = 'md' }: { type: 'pelosi' | 'trump' | 'pepe' | 'default', size?: 'sm' | 'md' | 'lg' }) {
+  const sizes = { sm: 'w-6 h-6 text-xs', md: 'w-8 h-8 text-sm', lg: 'w-10 h-10 text-base' }
+  const avatars = {
+    pelosi: { emoji: '👵', bg: 'from-neon-green/80 to-neon-cyan/80' },
+    trump: { emoji: '🍊', bg: 'from-neon-orange/80 to-yellow-500/80' },
+    pepe: { emoji: '🐸', bg: 'from-green-600/80 to-neon-green/80' },
+    default: { emoji: '🐋', bg: 'from-neon-cyan/80 to-neon-purple/80' }
+  }
+  const avatar = avatars[type]
   return (
-    <div className="w-full overflow-hidden bg-base-gray-50 rounded-lg py-3 border border-base-gray-200">
-      <div className="animate-marquee flex gap-8 whitespace-nowrap px-4">
-        {mockAlerts.map((alert) => (
-          <Link
-            key={alert.id}
-            href={alert.link}
-            className="flex items-center gap-2 hover:text-primary transition-smooth-fast"
-          >
-            <span className="text-2xl">{alert.icon}</span>
-            <span className="text-sm font-medium text-foreground">{alert.message}</span>
-            <span className="text-xs text-base-gray-700" suppressHydrationWarning>
-              {formatTimeAgo(alert.timestamp)}
-            </span>
+    <div className={cn("rounded-full bg-gradient-to-br flex items-center justify-center whale-bounce", avatar.bg, sizes[size])}>
+      <span>{avatar.emoji}</span>
+    </div>
+  )
+}
+
+// 碎纸机 Loading
+function ShredderLoading() {
+  return (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="relative">
+        <div className="w-14 h-10 bg-cyber-gray border border-cyber-border rounded-t-lg flex items-center justify-center">
+          <span className="text-xl">🗑️</span>
+        </div>
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 shredder-loading">
+          <div className="w-6 h-8 bg-neon-red/20 border border-neon-red/30 rounded text-center text-xs pt-0.5">📄</div>
+        </div>
+        <div className="flex gap-0.5 mt-0.5">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="w-1.5 h-6 bg-gradient-to-b from-cyber-border to-transparent rounded-b animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+          ))}
+        </div>
+      </div>
+      <p className="mt-6 text-xs font-mono text-neon-cyan cia-typing">Shredding classified documents</p>
+    </div>
+  )
+}
+
+// Alert Feed
+function AlertFeed() {
+  const memeAlerts = [
+    { id: 1, icon: '🐋', message: '佩洛西老公刚买入 $500K NVDA', link: '/traders/pelosi', timestamp: Date.now() - 60000 },
+    { id: 2, icon: '🍊', message: '懂王概念币暴涨 200%，聪明钱正在撤离', link: '/markets/trump', timestamp: Date.now() - 120000 },
+    { id: 3, icon: '🐸', message: 'Rare Pepe Whale 刚抄底了这个市场', link: '/markets/election', timestamp: Date.now() - 180000 },
+    { id: 4, icon: '💰', message: '发现新的国会山内幕交易信号', link: '/traders', timestamp: Date.now() - 240000 },
+  ]
+
+  return (
+    <div className="w-full overflow-hidden cyber-card py-2.5 relative">
+      <div className="animate-marquee flex gap-10 whitespace-nowrap px-4">
+        {memeAlerts.map((alert) => (
+          <Link key={alert.id} href={alert.link} className="flex items-center gap-2.5 hover:text-neon-cyan transition-smooth-fast group">
+            <span className="text-lg whale-bounce">{alert.icon}</span>
+            <span className="text-xs font-medium text-dim-white group-hover:text-neon-cyan">{alert.message}</span>
+            <span className="text-[10px] text-dim-gray font-mono" suppressHydrationWarning>{formatTimeAgo(alert.timestamp)}</span>
+            <span className="cyber-tag-green text-[10px] py-0.5">NEW</span>
           </Link>
         ))}
       </div>
@@ -30,39 +71,35 @@ function AlertFeed() {
   )
 }
 
+// Hot Markets
 function HotMarkets() {
   return (
-    <div className="rounded-lg bg-white border border-base-gray-200 p-6 card-elevated transition-smooth">
-      <h3 className="mb-4 text-lg font-bold text-foreground flex items-center gap-2">
-        热门市场
-      </h3>
-      <div className="space-y-3">
+    <div className="cyber-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-bold flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-neon-cyan" />
+          <span className="gradient-text">热门 Alpha</span>
+        </h3>
+        <span className="cyber-tag-cyan text-[10px]">// Leak Alpha</span>
+      </div>
+
+      <div className="space-y-2">
         {mockMarkets.slice(0, 4).map((market, index) => (
-          <Link
-            key={market.id}
-            href={`/markets/${market.slug}`}
-            className="block rounded-lg bg-base-gray-50 p-4 hover:bg-base-gray-100 transition-smooth-fast border border-transparent hover:border-primary/20"
-          >
+          <Link key={market.id} href={`/markets/${market.slug}`}
+            className="block rounded-lg bg-cyber-darker/60 p-3 hover:bg-cyber-gray border border-transparent hover:border-neon-cyan/30 transition-all group">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-base-gray-700">#{index + 1}</span>
-                  <span className="font-medium text-foreground line-clamp-1">{market.title}</span>
+                  <span className="text-[10px] font-mono text-neon-cyan">#{index + 1}</span>
+                  <span className="text-sm font-medium text-dim-white group-hover:text-neon-cyan line-clamp-1">{market.title}</span>
                 </div>
-                <div className="mt-1 flex items-center gap-2 text-xs">
-                  <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">
-                    {market.subcategory}
-                  </span>
+                <div className="mt-1">
+                  <span className="cyber-tag-cyan text-[10px] py-0.5">{market.subcategory}</span>
                 </div>
               </div>
-              <div className="text-right ml-4">
-                <div className="text-lg font-bold text-foreground">${market.currentPrice.toFixed(2)}</div>
-                <div
-                  className={cn(
-                    "text-sm font-medium",
-                    market.priceChange24h > 0 ? "text-success" : "text-danger"
-                  )}
-                >
+              <div className="text-right ml-3">
+                <div className="text-base font-bold font-mono text-foreground">${market.currentPrice.toFixed(2)}</div>
+                <div className={cn("text-xs font-mono", market.priceChange24h > 0 ? "text-neon-green" : "text-neon-red")}>
                   {market.priceChange24h > 0 ? "↑" : "↓"} {Math.abs(market.priceChange24h)}%
                 </div>
               </div>
@@ -70,195 +107,221 @@ function HotMarkets() {
           </Link>
         ))}
       </div>
-      <Link
-        href="/markets"
-        className="mt-4 block text-center text-sm text-primary hover:text-primary/80 font-medium transition-smooth-fast"
-      >
-        查看全部 →
+
+      <Link href="/markets" className="mt-4 flex items-center justify-center gap-2 text-xs text-neon-cyan hover:text-neon-green font-mono py-2 transition-smooth">
+        <Eye className="w-3.5 h-3.5" />
+        <span>Leak More Alpha →</span>
       </Link>
     </div>
   )
 }
 
+// Top Smart Money
 function TopSmartMoney() {
-  const smartMoneyTraders = mockTraders
-    .filter((t) => t.tags.includes('聪明钱'))
-    .sort((a, b) => b.winRate - a.winRate)
-    .slice(0, 5)
+  const smartMoneyTraders = mockTraders.filter((t) => t.tags.includes('聪明钱')).sort((a, b) => b.winRate - a.winRate).slice(0, 5)
+  const getWhaleType = (index: number): 'pelosi' | 'trump' | 'pepe' | 'default' => {
+    const types: ('pelosi' | 'trump' | 'pepe' | 'default')[] = ['pelosi', 'pepe', 'trump', 'default', 'pepe']
+    return types[index] || 'default'
+  }
 
   return (
-    <div className="rounded-lg bg-white border border-base-gray-200 p-6 card-elevated transition-smooth">
-      <h3 className="mb-4 text-lg font-bold text-foreground flex items-center gap-2">
-        Top Smart Money
-      </h3>
-      <div className="space-y-2">
+    <div className="cyber-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-bold flex items-center gap-2">
+          <Users className="w-4 h-4 text-neon-pink" />
+          <span className="gradient-text-pink">国会山巨鲸</span>
+        </h3>
+        <span className="cyber-tag-green text-[10px]">// Copy Homework</span>
+      </div>
+
+      <div className="space-y-1.5">
         {smartMoneyTraders.map((trader, index) => (
-          <Link
-            key={trader.address}
-            href={`/traders/${trader.address}`}
-            className="flex items-center justify-between rounded-lg bg-base-gray-50 p-3 hover:bg-base-gray-100 transition-smooth-fast border border-transparent hover:border-primary/20"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-base-gray-700 w-6">#{index + 1}</span>
-              <span className="font-mono text-sm font-medium text-foreground">{trader.shortAddress}</span>
-              <div className="flex gap-1">
-                {trader.tags.slice(0, 3).map((tag) => (
-                  <span key={tag} className="text-lg" title={tag}>
-                    {getTagEmoji(tag)}
-                  </span>
+          <Link key={trader.address} href={`/traders/${trader.address}`}
+            className="flex items-center justify-between rounded-lg bg-cyber-darker/60 p-2.5 hover:bg-cyber-gray border border-transparent hover:border-neon-pink/30 transition-all group">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-mono text-dim-gray w-5">#{index + 1}</span>
+              <WhaleAvatar type={getWhaleType(index)} size="sm" />
+              <span className="font-mono text-xs font-medium text-dim-white group-hover:text-neon-pink">{trader.shortAddress}</span>
+              <div className="flex gap-0.5">
+                {trader.tags.slice(0, 2).map((tag) => (
+                  <span key={tag} className="text-xs" title={tag}>{getTagEmoji(tag)}</span>
                 ))}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm font-bold text-smartmoney">{trader.winRate}%</div>
-              <div className="text-xs text-base-gray-700">ROI {trader.roi}%</div>
+              <div className="text-xs font-bold text-neon-green font-mono">{trader.winRate}%</div>
+              <div className="text-[10px] text-dim-gray font-mono">ROI {trader.roi}%</div>
             </div>
           </Link>
         ))}
       </div>
-      <Link
-        href="/traders?tab=smart-money"
-        className="mt-4 block text-center text-sm text-primary hover:text-primary/80 font-medium transition-smooth-fast"
-      >
-        查看完整榜单 →
+
+      <Link href="/traders?tab=smart-money" className="mt-4 flex items-center justify-center gap-2 text-xs text-neon-pink hover:text-neon-cyan font-mono py-2 transition-smooth">
+        <Copy className="w-3.5 h-3.5" />
+        <span>Copy Their Homework →</span>
       </Link>
     </div>
   )
 }
 
+// Reverse Indicator
 function ReverseIndicatorFeed() {
   const reverseTraders = mockTraders.filter((t) => t.tags.includes('反向指标'))
 
   return (
-    <div className="rounded-lg bg-white border border-base-gray-200 p-6 card-elevated transition-smooth">
-      <h3 className="mb-4 text-lg font-bold text-foreground flex items-center gap-2">
-        <span>🔴</span> 反向指标动态
-      </h3>
+    <div className="cyber-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-bold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-neon-red" />
+          <span className="text-neon-red">反向指标警报</span>
+        </h3>
+        <span className="cyber-tag-red text-[10px] alert-flash">// WRONG! 🔊</span>
+      </div>
+
       {reverseTraders.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {reverseTraders.slice(0, 2).map((trader) => (
-            <div
-              key={trader.address}
-              className="rounded-lg bg-danger/5 border border-danger/20 p-4 transition-smooth"
-            >
+            <div key={trader.address} className="rounded-lg bg-neon-red/5 border border-neon-red/20 p-3">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-medium text-foreground">{trader.shortAddress}</span>
-                    <span className="text-xs text-danger font-medium">胜率 {trader.winRate}%</span>
+                    <WhaleAvatar type="default" size="sm" />
+                    <span className="font-mono text-xs font-medium text-dim-white">{trader.shortAddress}</span>
+                    <span className="cyber-tag-red text-[10px] py-0.5">胜率 {trader.winRate}%</span>
                   </div>
-                  <div className="mt-1 text-sm text-base-gray-700">
-                    {trader.recentPerformance.message}
-                  </div>
+                  <div className="mt-1.5 text-xs text-dim-gray">{trader.recentPerformance.message}</div>
                 </div>
-                <div className="text-xs text-danger font-medium">
-                  反向强度 {85 - trader.winRate}/100
-                </div>
+                <div className="cyber-tag-red text-[10px]">反向 {85 - trader.winRate}</div>
               </div>
-              <div className="mt-3 rounded-lg bg-warning/10 border border-warning/20 p-3 text-xs text-base-gray-900">
-                <span className="font-medium text-warning">💡 </span>
-                {trader.aiReview.slice(0, 50)}...
+              <div className="mt-2.5 rounded-lg bg-neon-orange/10 border border-neon-orange/20 p-2 text-[10px] text-dim-white">
+                <span className="text-neon-orange font-medium">💡 Pro tip:</span> Do the opposite
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center text-sm text-base-gray-700 py-4">暂无反向指标动态</div>
+        <div className="text-center text-xs text-dim-gray py-6">暂无反向指标动态</div>
       )}
-      <Link
-        href="/traders?tab=reverse"
-        className="mt-4 block text-center text-sm text-primary hover:text-primary/80 font-medium transition-smooth-fast"
-      >
-        查看详情 →
+
+      <Link href="/traders?tab=reverse" className="mt-4 flex items-center justify-center gap-2 text-xs text-neon-red hover:text-neon-orange font-mono py-2 transition-smooth">
+        <span>See All Losers →</span>
       </Link>
     </div>
   )
 }
 
+// Market Sentiment
 function MarketSentiment() {
   return (
-    <div className="rounded-lg bg-white border border-base-gray-200 p-6 card-elevated transition-smooth">
-      <h3 className="mb-4 text-lg font-bold text-foreground flex items-center gap-2">
-        市场情绪指数 (7天)
-      </h3>
-      <ResponsiveContainer width="100%" height={200}>
+    <div className="cyber-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-bold flex items-center gap-2">
+          <Zap className="w-4 h-4 text-neon-cyan" />
+          <span className="gradient-text">市场情绪雷达</span>
+        </h3>
+        <span className="cyber-tag-cyan text-[10px]">7D</span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={180}>
         <LineChart data={mockSentimentData}>
-          <XAxis
-            dataKey="date"
-            stroke="#71717a"
-            tickFormatter={(val) => val.slice(5)}
-            style={{ fontSize: '12px' }}
-          />
-          <YAxis
-            stroke="#71717a"
-            domain={[0, 100]}
-            style={{ fontSize: '12px' }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e4e4e7',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-            }}
-            labelStyle={{ color: '#09090b', fontWeight: 600 }}
-          />
-          <Line
-            type="monotone"
-            dataKey="bullish"
-            stroke="#10B981"
-            strokeWidth={2}
-            name="看涨"
-            dot={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="bearish"
-            stroke="#EF4444"
-            strokeWidth={2}
-            name="看跌"
-            dot={false}
-          />
+          <XAxis dataKey="date" stroke="#4B5563" tickFormatter={(val) => val.slice(5)} style={{ fontSize: '10px', fontFamily: 'monospace' }} />
+          <YAxis stroke="#4B5563" domain={[0, 100]} style={{ fontSize: '10px', fontFamily: 'monospace' }} />
+          <Tooltip contentStyle={{ backgroundColor: '#161B28', border: '1px solid #1F2937', borderRadius: '8px', boxShadow: '0 0 20px rgba(0, 212, 255, 0.1)' }} labelStyle={{ color: '#00D4FF', fontWeight: 600, fontFamily: 'monospace', fontSize: '11px' }} />
+          <Line type="monotone" dataKey="bullish" stroke="#00FF9D" strokeWidth={2} name="Bulls" dot={false} />
+          <Line type="monotone" dataKey="bearish" stroke="#FF0055" strokeWidth={2} name="Bears" dot={false} />
         </LineChart>
       </ResponsiveContainer>
-      <div className="mt-4 flex justify-center gap-6 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-success"></div>
-          <span className="text-base-gray-700 font-medium">看涨情绪</span>
+
+      <div className="mt-3 flex justify-center gap-5 text-[10px]">
+        <div className="flex items-center gap-1.5">
+          <div className="h-2 w-2 rounded-full bg-neon-green glow-green"></div>
+          <span className="text-dim-gray font-mono">Bulls 🐂</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-danger"></div>
-          <span className="text-base-gray-700 font-medium">看跌情绪</span>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2 w-2 rounded-full bg-neon-red glow-red"></div>
+          <span className="text-dim-gray font-mono">Bears 🐻</span>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Stats Cards
+function StatsCards() {
+  const stats = [
+    { label: 'Alpha Leaked', value: '$2.4M', change: '+12.5%', icon: '💰', positive: true },
+    { label: 'Whales Tracked', value: '1,337', change: '+42', icon: '🐋', positive: true },
+    { label: 'Homework Copied', value: '8,964', change: '+156', icon: '📝', positive: true },
+    { label: 'Wrong Calls', value: '420', change: '-69', icon: '❌', positive: false },
+  ]
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {stats.map((stat, index) => (
+        <div key={index} className="cyber-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xl">{stat.icon}</span>
+            <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded", stat.positive ? "text-neon-green bg-neon-green/10" : "text-neon-red bg-neon-red/10")}>
+              {stat.change}
+            </span>
+          </div>
+          <div className={cn("text-xl font-bold font-mono", stat.positive ? "text-neon-cyan" : "text-neon-orange")}>
+            {stat.value}
+          </div>
+          <div className="text-[10px] text-dim-gray mt-0.5">{stat.label}</div>
+        </div>
+      ))}
     </div>
   )
 }
 
 export default function DashboardPage() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <ShredderLoading />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 pb-20 md:pb-6">
-      {/* 页面标题 */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
-          Dashboard
-        </h1>
+    <div className="space-y-5 pb-16">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
+            Control Room
+            <span className="w-2 h-2 rounded-full bg-neon-green pulse-dot" />
+          </h1>
+          <p className="text-[10px] text-dim-gray mt-1 font-mono">// Welcome back, fellow insider trader 🤫</p>
+        </div>
       </div>
 
-      {/* 实时警报流 */}
+      <StatsCards />
       <AlertFeed />
 
-      {/* 主要内容区域 */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <HotMarkets />
         <TopSmartMoney />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <ReverseIndicatorFeed />
         <MarketSentiment />
+      </div>
+
+      <div className="text-center py-3">
+        <p className="text-[9px] text-dim-gray font-mono">
+          ⚠️ This is satire. Not financial advice. We're definitely not connected to any government servers.
+        </p>
       </div>
     </div>
   )
 }
-

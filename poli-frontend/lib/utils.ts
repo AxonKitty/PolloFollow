@@ -20,9 +20,21 @@ export function formatAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-export function formatTimeAgo(date: Date | string): string {
+export function formatTimeAgo(date: Date | string | number | null | undefined): string {
+  if (!date) return ''
   const now = new Date()
-  const past = typeof date === 'string' ? new Date(date) : date
+  let past: Date
+  if (typeof date === 'number') {
+    past = new Date(date)
+  } else if (typeof date === 'string') {
+    past = new Date(date)
+  } else {
+    past = date
+  }
+
+  // 检查日期是否有效
+  if (isNaN(past.getTime())) return ''
+
   const seconds = Math.floor((now.getTime() - past.getTime()) / 1000)
 
   if (seconds < 60) return `${seconds}秒前`

@@ -4,7 +4,7 @@ async function main() {
     console.log("Deploying PredictionMarket contract...");
 
     // Get the USDC token address from environment
-    const usdcAddress = process.env.USDC_ADDRESS_MUMBAI || process.env.USDC_ADDRESS_POLYGON;
+    const usdcAddress = process.env.USDC_ADDRESS_POLYGON || process.env.USDC_ADDRESS_MUMBAI;
 
     if (!usdcAddress) {
         throw new Error("USDC address not found in environment variables");

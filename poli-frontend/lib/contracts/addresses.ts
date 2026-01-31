@@ -5,10 +5,10 @@ export const CONTRACTS = {
     // Polygon Mainnet (Chain ID: 137)
     polygon: {
         // TODO: Replace with your actual prediction market contract address
-        predictionMarket: '0x0000000000000000000000000000000000000000',
+        predictionMarket: '0x09205b94A76Ab65B52Eb9f653644fF9730632b7a',
 
-        // Official Polygon USDC address
-        usdc: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+        // Official Polygon USDC address (native USDC)
+        usdc: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
 
         // Official Polygon USDT address
         usdt: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
